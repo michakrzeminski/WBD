@@ -6,6 +6,7 @@ import javax.swing.JLabel;
 import javax.swing.JComboBox;
 import javax.swing.JButton;
 import javax.swing.JTable;
+import javax.swing.SwingConstants;
 
 public class Window {
 
@@ -23,6 +24,7 @@ public class Window {
 	private JTextField textField_10;
 	private JTextField textField_11;
 	private JTextField textField_12;
+	private JTable table_1;
 	private JTable table;
 
 	/**
@@ -64,7 +66,8 @@ public class Window {
 		textField.setColumns(10);
 		
 		JLabel lblDaneNowegoKlienta = new JLabel("Dane nowego klienta");
-		lblDaneNowegoKlienta.setBounds(61, 11, 184, 14);
+		lblDaneNowegoKlienta.setHorizontalAlignment(SwingConstants.CENTER);
+		lblDaneNowegoKlienta.setBounds(77, 11, 120, 14);
 		frame.getContentPane().add(lblDaneNowegoKlienta);
 		
 		JLabel lblImi = new JLabel("Imi\u0119:");
@@ -149,7 +152,8 @@ public class Window {
 		frame.getContentPane().add(btnNewButton);
 		
 		JLabel lblDanePojazdu = new JLabel("Dane pojazdu");
-		lblDanePojazdu.setBounds(61, 241, 108, 14);
+		lblDanePojazdu.setHorizontalAlignment(SwingConstants.CENTER);
+		lblDanePojazdu.setBounds(77, 240, 120, 14);
 		frame.getContentPane().add(lblDanePojazdu);
 		
 		JLabel lblNazwaModelu = new JLabel("Nazwa modelu:");
@@ -197,30 +201,44 @@ public class Window {
 		frame.getContentPane().add(textField_12);
 		textField_12.setColumns(10);
 		
-		JLabel lblPoleNieobowizkowe = new JLabel("* pole nieobowi\u0105zkowe");
+		JLabel lblPoleNieobowizkowe = new JLabel("* pole nieobowiazkowe");
 		lblPoleNieobowizkowe.setBounds(10, 382, 159, 14);
 		frame.getContentPane().add(lblPoleNieobowizkowe);
 		
-		JLabel lblRodzajNaprawy = new JLabel("Pow\u00F3d:");
+		JLabel lblRodzajNaprawy = new JLabel("Powod:");
 		lblRodzajNaprawy.setBounds(10, 410, 108, 14);
 		frame.getContentPane().add(lblRodzajNaprawy);
 		
 		JComboBox comboBox_1 = new JComboBox();
 		comboBox_1.setBounds(129, 407, 139, 20);
 		comboBox_1.addItem("Naprawa");
-		comboBox_1.addItem("Przegl¹d");
+		comboBox_1.addItem("Przeglad");
 		frame.getContentPane().add(comboBox_1);
 		
 		JButton btnRealizuj = new JButton("Realizuj");
 		btnRealizuj.setBounds(128, 450, 108, 23);
 		frame.getContentPane().add(btnRealizuj);
 		
-		JLabel lblRealizacjaUsugi = new JLabel("Realizacja us\u0142ugi");
-		lblRealizacjaUsugi.setBounds(379, 11, 122, 14);
+		JLabel lblRealizacjaUsugi = new JLabel("Operacje");
+		lblRealizacjaUsugi.setHorizontalAlignment(SwingConstants.CENTER);
+		lblRealizacjaUsugi.setBounds(353, 11, 120, 14);
 		frame.getContentPane().add(lblRealizacjaUsugi);
 		
+		JLabel lblNewLabel_3 = new JLabel("Realizacja operacji");
+		lblNewLabel_3.setHorizontalAlignment(SwingConstants.CENTER);
+		lblNewLabel_3.setBounds(353, 240, 120, 14);
+		frame.getContentPane().add(lblNewLabel_3);
+		
+		table_1 = new JTable();
+		table_1.setBounds(278, 265, 279, 208);
+		frame.getContentPane().add(table_1);
+		
 		table = new JTable();
-		table.setBounds(532, 194, -197, -141);
+		table.setBounds(278, 36, 279, 172);
 		frame.getContentPane().add(table);
+		
+		JButton btnNewButton_1 = new JButton("Zrobione");
+		btnNewButton_1.setBounds(468, 212, 89, 23);
+		frame.getContentPane().add(btnNewButton_1);
 	}
 }
