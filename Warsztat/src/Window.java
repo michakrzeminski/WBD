@@ -7,26 +7,31 @@ import javax.swing.JComboBox;
 import javax.swing.JButton;
 import javax.swing.JTable;
 import javax.swing.SwingConstants;
+import java.awt.event.ActionListener;
+import java.awt.event.ActionEvent;
 
 public class Window {
 
 	private JFrame frame;
-	private JTextField textField;
-	private JTextField textField_1;
-	private JTextField textField_2;
-	private JTextField textField_3;
-	private JTextField textField_4;
-	private JTextField textField_5;
-	private JTextField textField_6;
-	private JTextField textField_7;
-	private JTextField textField_8;
-	private JTextField textField_9;
-	private JTextField textField_10;
-	private JTextField textField_11;
-	private JTextField textField_12;
+	private JTextField field_imie;
+	private JTextField field_nazwisko;
+	private JTextField field_miejsc;
+	private JTextField field_ulica;
+	private JTextField field_nr_m;
+	private JTextField field_nr_l;
+	private JTextField field_tel;
+	private JTextField field_email;
+	private JTextField field_model;
+	private JTextField field_marka;
+	private JTextField field_rejestr;
+	private JTextField field_rok;
+	private JTextField field_przebieg;
 	private JTable table_1;
 	private JTable table;
-
+	private JComboBox<String> comboBox;
+	private JComboBox<String> comboBox_1;
+	private JLabel error;
+	
 	/**
 	 * Launch the application.
 	 */
@@ -60,10 +65,10 @@ public class Window {
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.getContentPane().setLayout(null);
 		
-		textField = new JTextField();
-		textField.setBounds(128, 36, 140, 20);
-		frame.getContentPane().add(textField);
-		textField.setColumns(10);
+		field_imie = new JTextField();
+		field_imie.setBounds(128, 36, 140, 20);
+		frame.getContentPane().add(field_imie);
+		field_imie.setColumns(10);
 		
 		JLabel lblDaneNowegoKlienta = new JLabel("Dane nowego klienta");
 		lblDaneNowegoKlienta.setHorizontalAlignment(SwingConstants.CENTER);
@@ -94,20 +99,20 @@ public class Window {
 		lblMiescowosc.setBounds(10, 84, 108, 14);
 		frame.getContentPane().add(lblMiescowosc);
 		
-		textField_1 = new JTextField();
-		textField_1.setBounds(128, 59, 140, 20);
-		frame.getContentPane().add(textField_1);
-		textField_1.setColumns(10);
+		field_nazwisko = new JTextField();
+		field_nazwisko.setBounds(128, 59, 140, 20);
+		frame.getContentPane().add(field_nazwisko);
+		field_nazwisko.setColumns(10);
 		
-		textField_2 = new JTextField();
-		textField_2.setBounds(128, 81, 140, 20);
-		frame.getContentPane().add(textField_2);
-		textField_2.setColumns(10);
+		field_miejsc = new JTextField();
+		field_miejsc.setBounds(128, 81, 140, 20);
+		frame.getContentPane().add(field_miejsc);
+		field_miejsc.setColumns(10);
 		
-		textField_3 = new JTextField();
-		textField_3.setBounds(128, 103, 140, 20);
-		frame.getContentPane().add(textField_3);
-		textField_3.setColumns(10);
+		field_ulica = new JTextField();
+		field_ulica.setBounds(128, 103, 140, 20);
+		frame.getContentPane().add(field_ulica);
+		field_ulica.setColumns(10);
 		
 		JLabel lblNrKontaktowy = new JLabel("Nr kontaktowy:");
 		lblNrKontaktowy.setBounds(10, 172, 108, 14);
@@ -121,35 +126,40 @@ public class Window {
 		lblNewLabel.setBounds(10, 216, 108, 14);
 		frame.getContentPane().add(lblNewLabel);
 		
-		textField_4 = new JTextField();
-		textField_4.setBounds(128, 125, 140, 20);
-		frame.getContentPane().add(textField_4);
-		textField_4.setColumns(10);
+		field_nr_m = new JTextField();
+		field_nr_m.setBounds(128, 125, 140, 20);
+		frame.getContentPane().add(field_nr_m);
+		field_nr_m.setColumns(10);
 		
-		textField_5 = new JTextField();
-		textField_5.setBounds(128, 147, 140, 20);
-		frame.getContentPane().add(textField_5);
-		textField_5.setColumns(10);
+		field_nr_l = new JTextField();
+		field_nr_l.setBounds(128, 147, 140, 20);
+		frame.getContentPane().add(field_nr_l);
+		field_nr_l.setColumns(10);
 		
-		textField_6 = new JTextField();
-		textField_6.setBounds(128, 169, 140, 20);
-		frame.getContentPane().add(textField_6);
-		textField_6.setColumns(10);
+		field_tel = new JTextField();
+		field_tel.setBounds(128, 169, 140, 20);
+		frame.getContentPane().add(field_tel);
+		field_tel.setColumns(10);
 		
-		textField_7 = new JTextField();
-		textField_7.setBounds(128, 191, 140, 20);
-		frame.getContentPane().add(textField_7);
-		textField_7.setColumns(10);
+		field_email = new JTextField();
+		field_email.setBounds(128, 191, 140, 20);
+		frame.getContentPane().add(field_email);
+		field_email.setColumns(10);
 		
-		JComboBox comboBox = new JComboBox();
+		comboBox = new JComboBox<String>();
 		comboBox.setBounds(128, 213, 140, 20);
 		comboBox.addItem("Tak");
 		comboBox.addItem("Nie");
 		frame.getContentPane().add(comboBox);
 		
-		JButton btnNewButton = new JButton("Zatwierd\u017A");
-		btnNewButton.setBounds(10, 450, 108, 23);
-		frame.getContentPane().add(btnNewButton);
+		JButton btnZatwierdz = new JButton("Zatwierd\u017A");
+		btnZatwierdz.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				clientData();
+			}
+		});
+		btnZatwierdz.setBounds(10, 450, 108, 23);
+		frame.getContentPane().add(btnZatwierdz);
 		
 		JLabel lblDanePojazdu = new JLabel("Dane pojazdu");
 		lblDanePojazdu.setHorizontalAlignment(SwingConstants.CENTER);
@@ -176,30 +186,30 @@ public class Window {
 		lblNewLabel_2.setBounds(10, 353, 108, 14);
 		frame.getContentPane().add(lblNewLabel_2);
 		
-		textField_8 = new JTextField();
-		textField_8.setBounds(128, 262, 140, 20);
-		frame.getContentPane().add(textField_8);
-		textField_8.setColumns(10);
+		field_model = new JTextField();
+		field_model.setBounds(128, 262, 140, 20);
+		frame.getContentPane().add(field_model);
+		field_model.setColumns(10);
 		
-		textField_9 = new JTextField();
-		textField_9.setBounds(128, 284, 140, 20);
-		frame.getContentPane().add(textField_9);
-		textField_9.setColumns(10);
+		field_marka = new JTextField();
+		field_marka.setBounds(128, 284, 140, 20);
+		frame.getContentPane().add(field_marka);
+		field_marka.setColumns(10);
 		
-		textField_10 = new JTextField();
-		textField_10.setBounds(128, 306, 140, 20);
-		frame.getContentPane().add(textField_10);
-		textField_10.setColumns(10);
+		field_rejestr = new JTextField();
+		field_rejestr.setBounds(128, 306, 140, 20);
+		frame.getContentPane().add(field_rejestr);
+		field_rejestr.setColumns(10);
 		
-		textField_11 = new JTextField();
-		textField_11.setBounds(128, 328, 140, 20);
-		frame.getContentPane().add(textField_11);
-		textField_11.setColumns(10);
+		field_rok = new JTextField();
+		field_rok.setBounds(128, 328, 140, 20);
+		frame.getContentPane().add(field_rok);
+		field_rok.setColumns(10);
 		
-		textField_12 = new JTextField();
-		textField_12.setBounds(128, 350, 140, 20);
-		frame.getContentPane().add(textField_12);
-		textField_12.setColumns(10);
+		field_przebieg = new JTextField();
+		field_przebieg.setBounds(128, 350, 140, 20);
+		frame.getContentPane().add(field_przebieg);
+		field_przebieg.setColumns(10);
 		
 		JLabel lblPoleNieobowizkowe = new JLabel("* pole nieobowiazkowe");
 		lblPoleNieobowizkowe.setBounds(10, 382, 159, 14);
@@ -209,13 +219,18 @@ public class Window {
 		lblRodzajNaprawy.setBounds(10, 410, 108, 14);
 		frame.getContentPane().add(lblRodzajNaprawy);
 		
-		JComboBox comboBox_1 = new JComboBox();
+		comboBox_1 = new<String> JComboBox();
 		comboBox_1.setBounds(129, 407, 139, 20);
 		comboBox_1.addItem("Naprawa");
 		comboBox_1.addItem("Przeglad");
 		frame.getContentPane().add(comboBox_1);
 		
 		JButton btnRealizuj = new JButton("Realizuj");
+		btnRealizuj.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				realization();
+			}
+		});
 		btnRealizuj.setBounds(128, 450, 108, 23);
 		frame.getContentPane().add(btnRealizuj);
 		
@@ -237,8 +252,84 @@ public class Window {
 		table.setBounds(278, 36, 279, 172);
 		frame.getContentPane().add(table);
 		
-		JButton btnNewButton_1 = new JButton("Zrobione");
-		btnNewButton_1.setBounds(468, 212, 89, 23);
-		frame.getContentPane().add(btnNewButton_1);
+		JButton btnZrobione = new JButton("Zrobione");
+		btnZrobione.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				resourceAllocation();
+			}
+		});
+		btnZrobione.setBounds(468, 212, 89, 23);
+		frame.getContentPane().add(btnZrobione);
+		
+		error = new JLabel("");
+		error.setBounds(10, 435, 258, 14);
+		frame.getContentPane().add(error);
+	}
+	
+	private void clientData() {
+		//TODO zapisanie do bazy danych danych pojazdu i wlasciciela
+		int counter = 0;
+		int counter2 = 0;
+		boolean flag = false;
+		
+		String[] clientData = new String[9];
+		String[] carData = new String[5];
+		clientData[0] = this.field_imie.getText();
+		clientData[1] = this.field_nazwisko.getText();
+		clientData[2] = this.field_miejsc.getText();
+		clientData[3] = this.field_ulica.getText();
+		clientData[4] = this.field_nr_m.getText();
+		clientData[5] = this.field_nr_l.getText();
+		clientData[6] = this.field_tel.getText();
+		clientData[7] = this.field_email.getText();
+		clientData[8] = (String) this.comboBox.getSelectedItem();
+		
+		carData[0] = this.field_model.getText();
+		carData[1] = this.field_marka.getText();
+		carData[2] = this.field_rejestr.getText();
+		carData[3] = this.field_rok.getText();
+		carData[4] = this.field_przebieg.getText();
+		
+		for(int i =0;i<clientData.length;i++) {
+			if(!clientData[i].isEmpty())
+				counter++;
+		}
+		for(int j =0;j<carData.length;j++) {
+			if(!carData[j].isEmpty())
+				counter2++;
+		}
+		if(counter == clientData.length -1 && counter2 == carData.length) {
+			flag = true;
+			counter = 0;
+			counter2 = 0;
+		} else {
+			this.error.setText("Nie wszystkie wymagane pola zostaly wybrane");
+			flag = false;
+		}
+		
+		if(flag) {
+			//TODO SQL INSERT INTO database
+		}
+	}
+	
+	private void realization() {
+		//TODO  dla naprawa/przeglad wypisanie operacji w table
+		
+		switch(this.comboBox_1.getSelectedIndex()) {
+			case 0:
+			{
+				//Naprawa
+				break;
+			}
+			case 1:
+			{
+				//Przeglad
+				break;
+			}
+		}
+	}
+	
+	private void resourceAllocation() {
+		//TODO
 	}
 }
