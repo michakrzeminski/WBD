@@ -13,6 +13,8 @@ import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 
 public class Window {
 
@@ -350,8 +352,7 @@ public class Window {
 	}
 	
 	private void realization() {
-		//TODO  dla naprawa/przeglad wypisanie operacji w table
-		
+		//scenariusz 1
 		try{
 		switch(this.comboBox_1.getSelectedIndex()) {
 			case 0:
@@ -359,24 +360,30 @@ public class Window {
 				//Naprawa
 				String query = "SELECT ID_OPERACJI, NAZWA FROM OPERACJA";
 				ResultSet rs = database.executeQuery(query);
-				String id="";
-				String name="";
+				List<String> id = new ArrayList<String>();
+				List<String> name = new ArrayList<String>();
+				int i=0;
 				while(rs.next()) {
-					id = rs.getString("ID_OPERACJI");
-					name = rs.getString("NAZWA");//uzyc do wyswietlenia w tabeli do wyboru
+					id.add(rs.getString("ID_OPERACJI"));
+					name.add(rs.getString("NAZWA"));
+					i++;
 				}
 				
 				DefaultTableModel model = (DefaultTableModel) table.getModel();
-				model.addRow(new Object[]{id,name});
+				for(int j=0;j<id.size();j++) {
+					model.addRow(new Object[]{id.get(j),name.get(j)});	
+				}
 				
-				//TODO wpisanie do tablicy wykonanie operacji ale tylko tej wybranej
-				query = "INSERT INTO WYKONANIE_OPERACJI (ID_WYKONANIA_OPERACJI, ID_PRZEGLADU, ID_OPERACJI) "
-						+ "VALUES ("
-						+getId("WYKONANIE_OPERACJI")
-						+id
-						+model.getValueAt(this.table.getSelectedRow(), 0)
-						+")";
-				database.executeQuery(query);
+				if(this.table.getSelectedRow() != -1)
+				{					
+					query = "INSERT INTO WYKONANIE_OPERACJI (ID_WYKONANIA_OPERACJI, ID_PRZEGLADU, ID_OPERACJI) "
+							+ "VALUES ("
+							+getId("WYKONANIE_OPERACJI")
+							+id
+							+model.getValueAt(this.table.getSelectedRow(), 0)
+							+")";
+					database.executeQuery(query);
+				}
 				break;
 			}
 			case 1:
@@ -388,24 +395,26 @@ public class Window {
 						+ "(SELECT ID_POZYCJI_PLANU_SERWISOWEGO FROM POZYCJA_PLANU_SERWISOWEGO "
 						+ "WHERE ID_MODELU IN (SELECT ID_MODELU FROM POJAZD WHERE NR_REJESTRACYJNY = '"+this.field_rejestr.getText()+"')))";
 				ResultSet rs = database.executeQuery(query);
-				String id="";
-				String name="";
+				List<String> id = new ArrayList<String>();
+				List<String> name = new ArrayList<String>();
 				while(rs.next()) {
-					id = rs.getString("ID_OPERACJI");
-					name = rs.getString("NAZWA");//uzyc do wyswietlenia w tabeli do wyboru
+					id.add(rs.getString("ID_OPERACJI"));
+					name.add(rs.getString("NAZWA"));
 				}
 				
 				DefaultTableModel model = (DefaultTableModel) table.getModel();
-				model.addRow(new Object[]{id,name});
 				
-				//TODO wpisanie do tablicy wykonanie operacji wszystkich jakis for
-				query = "INSERT INTO WYKONANIE_OPERACJI (ID_WYKONANIA_OPERACJI, ID_PRZEGLADU, ID_OPERACJI) "
-						+ "VALUES ("
-						+getId("WYKONANIE_OPERACJI")
-						+getId("ID_PRZEGLADU")
-						+id
-						+")";
-				database.executeQuery(query);
+				for(int i=0;i<id.size();i++) {
+					model.addRow(new Object[]{id.get(i),name.get(i)});	
+				
+					query = "INSERT INTO WYKONANIE_OPERACJI (ID_WYKONANIA_OPERACJI, ID_PRZEGLADU, ID_OPERACJI) "
+							+ "VALUES ("
+							+getId("WYKONANIE_OPERACJI")
+							+getId("ID_PRZEGLADU")
+							+id.get(i)
+							+")";
+					database.executeQuery(query);
+				}
 				break;
 			}
 		}
@@ -416,7 +425,7 @@ public class Window {
 	}
 	
 	private void resourceAllocation() {
-		//TODO
+		//scenariusz 2
 	}
 	
 	private int getId(String table) throws SQLException {
