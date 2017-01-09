@@ -426,6 +426,70 @@ public class Window {
 	
 	private void resourceAllocation() {
 		//scenariusz 2
+		try{		
+			String query = "SELECT ID_WYKONANIA_OPERACJI FROM WYKONANIE_OPERACJI";
+			ResultSet rs = database.executeQuery(query);
+			List<String> idwykon = new ArrayList<String>();
+			while(rs.next()) {
+				idwykon.add(rs.getString("ID_WYKONANIA_OPERACJI"));
+			}
+			if(idwykon.size() !=0) {
+				for(int k=0;k<idwykon.size();k++) {
+					//TODO przydzial pracownika
+					query = "INSERT INTO Przydzial_Pracownika VALUES (1, "
+							+ idwykon.get(k)
+							+ ")";
+					database.executeQuery(query);
+					
+					//przydzial stanowiska
+					query = "UPDATE WYKONANIE_OPERACJI SET ID_STANOWISKA = "
+							+ "(SELECT ID_STANOWISKA FROM STANOWISKO WHERE ID_TYPU_STANOWISKA = "
+							+ "(SELECT ID_TYPU_STANOWISKA FROM OPERACJA WHERE ID_TYPU_STANOWISKA = "
+							+ "WYKONANIE_OPERACJI.ID_OPERACJI)) WHERE ID_WYKONANIA_OPERACJI = "
+							+ idwykon.get(k);
+					database.executeQuery(query);
+					
+					//przydzial czesci
+					query = "INSERT INTO PRZYDZIAL_CZESCI VALUES "
+							+ "("
+							+ idwykon.get(k)
+							+ ",(SELECT ID_CZESCI FROM Czesc WHERE ID_OPERACJI = "
+							+ "(SELECT ID_OPERACJI FROM WYKONANIE_OPERACJI WHERE ID_WYKONANIA_OPERACJI = "
+							+ idwykon.get(k)
+							+ ")))";
+					database.executeQuery(query);
+				}
+				
+				//wyswietlenie wszytkiego 
+				query = "SELECT CZESC.NAZWA, STANOWISKO.NAZWA_STANOWISKA, STANOWISKO.NR_STANOWISKA, PRACOWNIK.NAZWISKO "
+							+ "FROM CZESC JOIN PRACOWNIK ON ID_PRACOWNIKA = "
+							+ "(SELECT ID_PRACOWNIKA FROM PRZYDZIAL_PRACOWNIKA WHERE WYKONANIE_OPERACJI = "
+							+ "(SELECT ID_WYKONANIA_OPERACJI FROM PRZYDZIAL_CZESCI WHERE ID_CZESCI = CZESC.ID_CZESCI)) "
+							+ "JOIN STANOWISKO ON ID_STANOWISKA = "
+							+ "(SELECT ID_STANOWISKA FROM WYKONANIE_OPERACJI WHERE ID_WYKONANIA_OPERACJI = "
+							+ "(SELECT ID_WYKONANIA_OPERACJI FROM PRZYDZIAL_CZESCI WHERE ID_CZESCI = CZESC.ID_CZESCI))";
+				rs  = database.executeQuery(query);
+				List<String> nazwaczesci = new ArrayList<String>();
+				List<String> nazwastanowiska = new ArrayList<String>();
+				List<String> nrstanowiska = new ArrayList<String>();
+				List<String> nazwpracownika = new ArrayList<String>();
+				while(rs.next()) {
+					nazwaczesci.add(rs.getString("NAZWA"));
+					nazwastanowiska.add(rs.getString("NAZWA_STANOWISKA"));
+					nrstanowiska.add(rs.getString("NR_STANOWISKA"));
+					nazwpracownika.add(rs.getString("NAZWISKO"));
+				}
+					
+				DefaultTableModel model = (DefaultTableModel) table_1.getModel();
+				
+				for(int i=0;i<nazwaczesci.size();i++) {
+					model.addRow(new Object[]{nazwaczesci.get(i),nazwastanowiska.get(i),nrstanowiska.get(i),nazwpracownika.get(i)});	
+				}
+			}
+		}
+		catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 	
 	private int getId(String table) throws SQLException {
