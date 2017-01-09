@@ -7,8 +7,12 @@ import javax.swing.JComboBox;
 import javax.swing.JButton;
 import javax.swing.JTable;
 import javax.swing.SwingConstants;
+import javax.swing.table.DefaultTableModel;
+
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 
 public class Window {
 
@@ -32,6 +36,9 @@ public class Window {
 	private JComboBox<String> comboBox_1;
 	private JLabel error;
 	
+	private int id=0;
+	
+	private static JDBCConnection database;
 	/**
 	 * Launch the application.
 	 */
@@ -39,7 +46,7 @@ public class Window {
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
 				try {
-					JDBCConnection n = new JDBCConnection();
+					database = new JDBCConnection();
 					Window window = new Window();
 					window.frame.setVisible(true);
 				} catch (Exception e) {
@@ -155,6 +162,7 @@ public class Window {
 		JButton btnZatwierdz = new JButton("Zatwierd\u017A");
 		btnZatwierdz.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
+				id++;
 				clientData();
 			}
 		});
@@ -267,7 +275,6 @@ public class Window {
 	}
 	
 	private void clientData() {
-		//TODO zapisanie do bazy danych danych pojazdu i wlasciciela
 		int counter = 0;
 		int counter2 = 0;
 		boolean flag = false;
@@ -298,7 +305,7 @@ public class Window {
 			if(!carData[j].isEmpty())
 				counter2++;
 		}
-		if(counter == clientData.length -1 && counter2 == carData.length) {
+		if(counter >= clientData.length -1 && counter2 == carData.length) {
 			flag = true;
 			counter = 0;
 			counter2 = 0;
@@ -308,28 +315,116 @@ public class Window {
 		}
 		
 		if(flag) {
-			//TODO SQL INSERT INTO database
+			try{
+				//insert to wlasciciel_pojazdu
+				int idwlasc = getId("WLASCICIEL_POJAZDU");
+				String query = "INSERT INTO WLASCICIEL_POJAZDU VALUES("+idwlasc+", ";
+				for(int i=0;i<clientData.length;i++)
+				{
+					query+="'"+clientData[i]+"', ";
+				}
+				query = query.substring(0, query.length()-2);
+				query += ")";
+				database.executeQuery(query);
+				
+				//insert to model
+				int idmodelu = getId("MODEL");
+				query = "INSERT INTO MODEL VALUES("+idmodelu+", ";
+				query +="'"+carData[0]+"', ";
+				query +="'"+carData[1]+"'";
+				query += ")";
+				database.executeQuery(query);
+				
+				//insert to pojazd
+				query = "INSERT INTO POJAZD VALUES("+getId("POJAZD")+", "+idwlasc+", "+idmodelu+", ";
+				query +="'"+carData[2]+"', ";
+				query +="'"+Integer.parseInt(carData[3])+"', ";
+				query +="'"+Integer.parseInt(carData[4])+"'";
+				query += ")";
+				database.executeQuery(query);
+			}
+			catch (Exception e) {
+				e.printStackTrace();
+			}
 		}
 	}
 	
 	private void realization() {
 		//TODO  dla naprawa/przeglad wypisanie operacji w table
 		
+		try{
 		switch(this.comboBox_1.getSelectedIndex()) {
 			case 0:
 			{
 				//Naprawa
+				String query = "SELECT ID_OPERACJI, NAZWA FROM OPERACJA";
+				ResultSet rs = database.executeQuery(query);
+				String id="";
+				String name="";
+				while(rs.next()) {
+					id = rs.getString("ID_OPERACJI");
+					name = rs.getString("NAZWA");//uzyc do wyswietlenia w tabeli do wyboru
+				}
+				
+				DefaultTableModel model = (DefaultTableModel) table.getModel();
+				model.addRow(new Object[]{id,name});
+				
+				//TODO wpisanie do tablicy wykonanie operacji ale tylko tej wybranej
+				query = "INSERT INTO WYKONANIE_OPERACJI (ID_WYKONANIA_OPERACJI, ID_PRZEGLADU, ID_OPERACJI) "
+						+ "VALUES ("
+						+getId("WYKONANIE_OPERACJI")
+						+id
+						+model.getValueAt(this.table.getSelectedRow(), 0)
+						+")";
+				database.executeQuery(query);
 				break;
 			}
 			case 1:
 			{
 				//Przeglad
+				String query = "SELECT ID_OPERACJI, NAZWA FROM OPERACJA "
+						+ "WHERE ID_OPERACJI IN(SELECT ID_OPERACJI FROM OPERACJA_SERWISOWA "
+						+ "WHERE ID_POZYCJI_PLANU_SERWISOWEGO IN "
+						+ "(SELECT ID_POZYCJI_PLANU_SERWISOWEGO FROM POZYCJA_PLANU_SERWISOWEGO "
+						+ "WHERE ID_MODELU IN (SELECT ID_MODELU FROM POJAZD WHERE NR_REJESTRACYJNY = '"+this.field_rejestr.getText()+"')))";
+				ResultSet rs = database.executeQuery(query);
+				String id="";
+				String name="";
+				while(rs.next()) {
+					id = rs.getString("ID_OPERACJI");
+					name = rs.getString("NAZWA");//uzyc do wyswietlenia w tabeli do wyboru
+				}
+				
+				DefaultTableModel model = (DefaultTableModel) table.getModel();
+				model.addRow(new Object[]{id,name});
+				
+				//TODO wpisanie do tablicy wykonanie operacji wszystkich jakis for
+				query = "INSERT INTO WYKONANIE_OPERACJI (ID_WYKONANIA_OPERACJI, ID_PRZEGLADU, ID_OPERACJI) "
+						+ "VALUES ("
+						+getId("WYKONANIE_OPERACJI")
+						+getId("ID_PRZEGLADU")
+						+id
+						+")";
+				database.executeQuery(query);
 				break;
 			}
+		}
+		}
+		catch (Exception e) {
+			e.printStackTrace();
 		}
 	}
 	
 	private void resourceAllocation() {
 		//TODO
+	}
+	
+	private int getId(String table) throws SQLException {
+		String query = "SELECT COUNT(*) FROM "+table;
+		ResultSet rs = database.executeQuery(query);
+		int i=0;
+		while(rs.next())
+			i = rs.getInt(1);
+		return i+1;
 	}
 }
