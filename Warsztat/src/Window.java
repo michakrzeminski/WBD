@@ -10,6 +10,7 @@ import javax.swing.SwingConstants;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumn;
 
+
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 import java.sql.ResultSet;
@@ -343,6 +344,7 @@ public class Window {
 				//insert to pojazd
 				int id_pojazdu = getId("POJAZD");
 				query = "INSERT INTO POJAZD VALUES("+id_pojazdu+", "+idwlasc+", "+idmodelu+", ";
+				query = "INSERT INTO POJAZD VALUES("+getId("POJAZD")+", "+idwlasc+", "+idmodelu+", ";
 				query +="'"+carData[2]+"', ";
 				query +="'"+Integer.parseInt(carData[3])+"', ";
 				query +="'"+Integer.parseInt(carData[4])+"'";
@@ -353,6 +355,7 @@ public class Window {
 				query = "INSERT INTO NAPRAWA (ID_NAPRAWY, ID_POJAZDU) VALUES("+getId("NAPRAWA")+", "+id_pojazdu+")";
 				//System.out.println("INSERT INTO NAPRAWA (ID_NAPRAWY, ID_POJAZDU) VALUES("+id_naprawy+", "+id_pojazdu+")");
 				database.executeQuery(query);
+
 			}
 			catch (Exception e) {
 				e.printStackTrace();
@@ -407,6 +410,20 @@ public class Window {
 							+"Naprawa"
 							+")";
 					System.out.println(query);
+				
+				DefaultTableModel model = (DefaultTableModel) table.getModel();
+				for(int j=0;j<id.size();j++) {
+					model.addRow(new Object[]{id.get(j),name.get(j)});	
+				}
+				
+				if(this.table.getSelectedRow() != -1)
+				{					
+					query = "INSERT INTO WYKONANIE_OPERACJI (ID_WYKONANIA_OPERACJI, ID_PRZEGLADU, ID_OPERACJI) "
+							+ "VALUES ("
+							+getId("WYKONANIE_OPERACJI")
+							+id
+							+model.getValueAt(this.table.getSelectedRow(), 0)
+							+")";
 					database.executeQuery(query);
 				}
 				break;
@@ -457,6 +474,18 @@ public class Window {
 							+")";
 					database.executeQuery(query);
 				
+				
+				for(int i=0;i<id.size();i++) {
+					model.addRow(new Object[]{id.get(i),name.get(i)});	
+				
+					query = "INSERT INTO WYKONANIE_OPERACJI (ID_WYKONANIA_OPERACJI, ID_PRZEGLADU, ID_OPERACJI) "
+							+ "VALUES ("
+							+getId("WYKONANIE_OPERACJI")
+							+getId("ID_PRZEGLADU")
+							+id.get(i)
+							+")";
+					database.executeQuery(query);
+				}
 				break;
 			}
 		}
