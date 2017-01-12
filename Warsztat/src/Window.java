@@ -1,12 +1,16 @@
+import java.awt.BorderLayout;
 import java.awt.EventQueue;
 
 import javax.swing.JFrame;
 import javax.swing.JTextField;
 import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.JComboBox;
 import javax.swing.JButton;
 import javax.swing.JTable;
 import javax.swing.SwingConstants;
+import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumn;
 
@@ -18,7 +22,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Window {
+public class Window{
 
 	private JFrame frame;
 	private JTextField field_imie;
@@ -40,6 +44,8 @@ public class Window {
 	private JComboBox<String> comboBox_1;
 	private JLabel error;
 	private int zmienna=0;
+	private int id_naprawy=0;
+	private int id_pozycji_serwisowania=0;
 	
 	private int id=0;
 	
@@ -81,6 +87,7 @@ public class Window {
 		field_imie.setBounds(128, 36, 140, 20);
 		frame.getContentPane().add(field_imie);
 		field_imie.setColumns(10);
+		
 		
 		JLabel lblDaneNowegoKlienta = new JLabel("Dane nowego klienta");
 		lblDaneNowegoKlienta.setHorizontalAlignment(SwingConstants.CENTER);
@@ -261,6 +268,7 @@ public class Window {
 		table_1.setBounds(278, 265, 279, 208);
 		frame.getContentPane().add(table_1);
 		
+		
 		table = new JTable();
 		table.setBounds(278, 36, 279, 172);
 		frame.getContentPane().add(table);
@@ -352,7 +360,13 @@ public class Window {
 				database.executeQuery(query);
 				
 				//insert to naprawa
-				query = "INSERT INTO NAPRAWA (ID_NAPRAWY, ID_POJAZDU) VALUES("+getId("NAPRAWA")+", "+id_pojazdu+")";
+				id_naprawy = getId("NAPRAWA");
+				query = "INSERT INTO NAPRAWA (ID_NAPRAWY, ID_POJAZDU) VALUES("+id_naprawy+", "+id_pojazdu+")";
+				//System.out.println("INSERT INTO NAPRAWA (ID_NAPRAWY, ID_POJAZDU) VALUES("+id_naprawy+", "+id_pojazdu+")");
+				database.executeQuery(query);
+				
+				id_pozycji_serwisowania = getId("POZYCJA_PLANU_SERWISOWEGO");
+				query = "INSERT INTO POZYCJA_PLANU_SERWISOWEGO (ID_POZYCJI_PLANU_SERWISOWEGO, ID_MODELU) VALUES("+id_pozycji_serwisowania+", "+idmodelu+")";
 				//System.out.println("INSERT INTO NAPRAWA (ID_NAPRAWY, ID_POJAZDU) VALUES("+id_naprawy+", "+id_pojazdu+")");
 				database.executeQuery(query);
 
@@ -383,49 +397,33 @@ public class Window {
 				DefaultTableModel model = (DefaultTableModel) table.getModel();
 				model.setRowCount(0);
 				model.setColumnCount(0);
+				//String [] columns = {"ID_OPERACJI","NAZWA"};
+				//model.setColumnIdentifiers(columns);
+				table.setModel(model);
 				model.addColumn("ID_OPERACJI");
 		        model.addColumn("NAZWA");
 		        model.addRow(new Object[]{"ID_OPERACJI","NAZWA"});	
 				for(int j=0;j<id.size();j++) {
 					model.addRow(new Object[]{id.get(j),name.get(j)});	
 				}
+				
 				if(this.table.getSelectedRow() != -1)	
 				{
-					query = "SELECT ID_STANOWISKA FROM STANOWISKO WHERE NAZWA_STANOWISKA = "+ table.getValueAt(this.table.getSelectedRow(), 1);
+					query = "SELECT ID_STANOWISKA FROM STANOWISKO WHERE NAZWA_STANOWISKA = '"+ table.getValueAt(this.table.getSelectedRow(), 1)+"'";
 					ResultSet rsc = database.executeQuery(query);
-					rsc.first();
-					int id_stanowiska = rsc.getInt(1);
-					query = "SELECT ID_NAPRAWY FROM NAPRAWA WHERE ID_POJAZDU = (SELECT ID_POJAZDU FROM POJAZD WHERE ID_WLASCICIELA = "+ zmienna;
-					ResultSet rsd = database.executeQuery(query);
-					rsd.first();
-					int id_naprawy = rsd.getInt(1);
+					int id_stanowiska = rsc.getRow();
 					
-					query = "INSERT INTO WYKONANIE_OPERACJI (ID_WYKONANIA_OPERACJI, ID_PRZEGLADU, ID_NAPRAWY, ID_OPERACJI, ID_STANOWISKA, RODZAJ_OPERACJI) "
+					query = "INSERT INTO WYKONANIE_OPERACJI (ID_WYKONANIA_OPERACJI, ID_NAPRAWY, ID_OPERACJI, ID_STANOWISKA, RODZAJ_OPERACJI) "
 							+ "VALUES ("
 							+getId("WYKONANIE_OPERACJI")
-							+","+id
 							+","+id_naprawy
 							+","+model.getValueAt(this.table.getSelectedRow(), 0)
 							+","+id_stanowiska
-							+"Naprawa"
+							+","+"'Naprawa'"
 							+")";
 					System.out.println(query);
-				
-				DefaultTableModel model = (DefaultTableModel) table.getModel();
-				for(int j=0;j<id.size();j++) {
-					model.addRow(new Object[]{id.get(j),name.get(j)});	
-				}
-				
-				if(this.table.getSelectedRow() != -1)
-				{					
-					query = "INSERT INTO WYKONANIE_OPERACJI (ID_WYKONANIA_OPERACJI, ID_PRZEGLADU, ID_OPERACJI) "
-							+ "VALUES ("
-							+getId("WYKONANIE_OPERACJI")
-							+id
-							+model.getValueAt(this.table.getSelectedRow(), 0)
-							+")";
 					database.executeQuery(query);
-				}
+			}
 				break;
 			}
 			case 1:
@@ -552,7 +550,10 @@ public class Window {
 				}
 					
 				DefaultTableModel model = (DefaultTableModel) table_1.getModel();
-				
+				model.addColumn("NAZWA");
+				model.addColumn("NAZWA_STANOWISKA");
+				model.addColumn("NR_STANOWISKA");
+				model.addColumn("NAZWISKO");
 				for(int i=0;i<nazwaczesci.size();i++) {
 					model.addRow(new Object[]{nazwaczesci.get(i),nazwastanowiska.get(i),nrstanowiska.get(i),nazwpracownika.get(i)});	
 				}
@@ -571,4 +572,5 @@ public class Window {
 			i = rs.getInt(1);
 		return i+1;
 	}
+
 }
