@@ -79,7 +79,7 @@ public class Window{
 	 */
 	private void initialize() {
 		frame = new JFrame();
-		frame.setBounds(100, 100, 583, 536);
+		frame.setBounds(100, 100, 583, 545);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.getContentPane().setLayout(null);
 		
@@ -276,7 +276,7 @@ public class Window{
 		JButton btnZrobione = new JButton("Zrobione");
 		btnZrobione.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				resourceAllocation();
+				insertRealization();
 			}
 		});
 		btnZrobione.setBounds(468, 212, 89, 23);
@@ -285,6 +285,15 @@ public class Window{
 		error = new JLabel("");
 		error.setBounds(10, 435, 258, 14);
 		frame.getContentPane().add(error);
+		
+		JButton btnWyswietl = new JButton("Wy\u015Bwietl");
+		btnWyswietl.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				resourceAllocation();
+			}
+		});
+		btnWyswietl.setBounds(468, 472, 89, 23);
+		frame.getContentPane().add(btnWyswietl);
 	}
 	
 	private void clientData() {
@@ -407,23 +416,6 @@ public class Window{
 					model.addRow(new Object[]{id.get(j),name.get(j)});	
 				}
 				
-				if(this.table.getSelectedRow() != -1)	
-				{
-					query = "SELECT ID_STANOWISKA FROM STANOWISKO WHERE NAZWA_STANOWISKA = '"+ table.getValueAt(this.table.getSelectedRow(), 1)+"'";
-					ResultSet rsc = database.executeQuery(query);
-					int id_stanowiska = rsc.getRow();
-					
-					query = "INSERT INTO WYKONANIE_OPERACJI (ID_WYKONANIA_OPERACJI, ID_NAPRAWY, ID_OPERACJI, ID_STANOWISKA, RODZAJ_OPERACJI) "
-							+ "VALUES ("
-							+getId("WYKONANIE_OPERACJI")
-							+","+id_naprawy
-							+","+model.getValueAt(this.table.getSelectedRow(), 0)
-							+","+id_stanowiska
-							+","+"'Naprawa'"
-							+")";
-					System.out.println(query);
-					database.executeQuery(query);
-			}
 				break;
 			}
 			case 1:
@@ -487,6 +479,32 @@ public class Window{
 				break;
 			}
 		}
+		}
+		catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+	
+	private void insertRealization() {
+		DefaultTableModel model = (DefaultTableModel) table.getModel();
+		try {
+			if(this.table.getSelectedRow() != -1 && this.comboBox_1.getSelectedIndex() == 0)	
+			{
+				String query = "SELECT ID_STANOWISKA FROM STANOWISKO WHERE NAZWA_STANOWISKA = '"+ table.getValueAt(this.table.getSelectedRow(), 1)+"'";
+				ResultSet rsc = database.executeQuery(query);
+				int id_stanowiska = rsc.getRow();
+				
+				query = "INSERT INTO WYKONANIE_OPERACJI (ID_WYKONANIA_OPERACJI, ID_NAPRAWY, ID_OPERACJI, ID_STANOWISKA, RODZAJ_OPERACJI) "
+						+ "VALUES ("
+						+getId("WYKONANIE_OPERACJI")
+						+","+id_naprawy
+						+","+model.getValueAt(this.table.getSelectedRow(), 0)
+						+","+id_stanowiska
+						+","+"'Naprawa'"
+						+")";
+				System.out.println(query);
+				database.executeQuery(query);
+			}
 		}
 		catch (Exception e) {
 			e.printStackTrace();
@@ -572,5 +590,4 @@ public class Window{
 			i = rs.getInt(1);
 		return i+1;
 	}
-
 }
