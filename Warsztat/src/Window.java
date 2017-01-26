@@ -266,14 +266,21 @@ public class Window{
 		lblNewLabel_3.setBounds(353, 240, 120, 14);
 		frame.getContentPane().add(lblNewLabel_3);
 		
-		table_1 = new JTable();
-		table_1.setBounds(278, 265, 279, 208);
-		frame.getContentPane().add(table_1);
+		JScrollPane scrollPane = new JScrollPane();
+		scrollPane.setBounds(278, 265, 279, 208);
+		frame.getContentPane().add(scrollPane);
 		
+		table_1 = new JTable();
+		scrollPane.setViewportView(table_1);
+		
+		JScrollPane scrollPane_1 = new JScrollPane();
+		scrollPane_1.setBounds(278, 36, 279, 172);
+		frame.getContentPane().add(scrollPane_1);
 		
 		table = new JTable();
-		table.setBounds(278, 36, 279, 172);
-		frame.getContentPane().add(table);
+		scrollPane_1.setViewportView(table);
+		
+
 		
 		JButton btnZrobione = new JButton("Zrobione");
 		btnZrobione.addActionListener(new ActionListener() {
@@ -394,8 +401,7 @@ public class Window{
 					query += ")";
 					database.executeQuery(query);
 	
-
-						
+	
 					//insert to pojazd
 					 id_pojazdu = getId("POJAZD");
 					query = "INSERT INTO POJAZD VALUES("+id_pojazdu+", "+idwlasc+", "+idmodelu+", ";
@@ -427,7 +433,6 @@ public class Window{
 				//insert to naprawa
 				id_naprawy = getId("NAPRAWA");
 				String query = "INSERT INTO NAPRAWA (ID_NAPRAWY, ID_POJAZDU) VALUES("+id_naprawy+", "+id_pojazdu+")";
-				//System.out.println("INSERT INTO NAPRAWA (ID_NAPRAWY, ID_POJAZDU) VALUES("+id_naprawy+", "+id_pojazdu+")");
 				database.executeQuery(query);
 				
 				query = "SELECT ID_OPERACJI, NAZWA FROM OPERACJA";
@@ -443,12 +448,9 @@ public class Window{
 				DefaultTableModel model = (DefaultTableModel) table.getModel();
 				model.setRowCount(0);
 				model.setColumnCount(0);
-				//String [] columns = {"ID_OPERACJI","NAZWA"};
-				//model.setColumnIdentifiers(columns);
 				table.setModel(model);
 				model.addColumn("ID_OPERACJI");
 		        model.addColumn("NAZWA");
-		        model.addRow(new Object[]{"ID_OPERACJI","NAZWA"});	
 				for(int j=0;j<id.size();j++) {
 					model.addRow(new Object[]{id.get(j),name.get(j)});	
 				}
@@ -482,7 +484,6 @@ public class Window{
 				model.setColumnCount(0);
 				model.addColumn("ID_OPERACJI");
 		        model.addColumn("NAZWA");
-		        model.addRow(new Object[]{"ID_OPERACJI","NAZWA"});	
 				for(int k=0;k<id.size();k++) 
 				{
 					model.addRow(new Object[]{id.get(k),name.get(k)});	
@@ -592,14 +593,21 @@ public class Window{
 					database.executeQuery(query);
 				}
 				
-				//wyswietlenie wszytkiego 
-				query = "SELECT CZESC.NAZWA, STANOWISKO.NAZWA_STANOWISKA, STANOWISKO.NR_STANOWISKA, PRACOWNIK.NAZWISKO "
+				//wyswietlenie wszytkiego
+				query = "SELECT ID_WYKONANIA_OPERACJI, ID_OPERACJI, NAZWA_STANOWISKA, NAZWISKO "
+						+ "FROM WYKONANIE_OPERACJI JOIN STANOWISKO ON NAZWA_STANOWISKA IN "
+						+ "(SELECT NAZWA_STANOWISKA FROM STANOWISKO WHERE ID_STANOWISKA = WYKONANIE_OPERACJI.ID_STANOWISKA)"
+						+ "JOIN PRACOWNIK ON NAZWISKO IN (SELECT NAZWISKO FROM PRACOWNIK WHERE ID_PRACOWNIKA IN"
+						+ "(SELECT ID_PRACOWNIKA FROM PRZYDZIAL_PRACOWNIKA WHERE ID_WYKONANIA_OPERACJI ="
+						+ " WYKONANIE_OPERACJI.ID_WYKONANIA_OPERACJI))";
+				
+				/*query = "SELECT CZESC.NAZWA, STANOWISKO.NAZWA_STANOWISKA, STANOWISKO.NR_STANOWISKA, PRACOWNIK.NAZWISKO "
 							+ "FROM CZESC JOIN PRACOWNIK ON ID_PRACOWNIKA IN "
 							+ "(SELECT ID_PRACOWNIKA FROM PRZYDZIAL_PRACOWNIKA WHERE ID_WYKONANIA_OPERACJI IN "
 							+ "(SELECT ID_WYKONANIA_OPERACJI FROM PRZYDZIAL_CZESCI WHERE ID_CZESCI IN CZESC.ID_CZESCI)) "
 							+ "JOIN STANOWISKO ON ID_STANOWISKA IN "
 							+ "(SELECT ID_STANOWISKA FROM WYKONANIE_OPERACJI WHERE ID_WYKONANIA_OPERACJI IN "
-							+ "(SELECT ID_WYKONANIA_OPERACJI FROM PRZYDZIAL_CZESCI WHERE ID_CZESCI IN CZESC.ID_CZESCI))";
+							+ "(SELECT ID_WYKONANIA_OPERACJI FROM PRZYDZIAL_CZESCI WHERE ID_CZESCI IN CZESC.ID_CZESCI))";*/
 				System.out.println(query);
 				rs  = database.executeQuery(query);
 				List<String> nazwaczesci = new ArrayList<String>();
@@ -607,9 +615,9 @@ public class Window{
 				List<String> nrstanowiska = new ArrayList<String>();
 				List<String> nazwpracownika = new ArrayList<String>();
 				while(rs.next()) {
-					nazwaczesci.add(rs.getString("NAZWA"));
-					nazwastanowiska.add(rs.getString("NAZWA_STANOWISKA"));
-					nrstanowiska.add(rs.getString("NR_STANOWISKA"));
+					nazwaczesci.add(rs.getString("ID_WYKONANIA_OPERACJI"));
+					nazwastanowiska.add(rs.getString("ID_OPERACJI"));
+					nrstanowiska.add(rs.getString("NAZWA_STANOWISKA"));
 					nazwpracownika.add(rs.getString("NAZWISKO"));
 				}
 				
@@ -617,13 +625,13 @@ public class Window{
 				model1.setRowCount(0);
 				model1.setColumnCount(0);
 				table_1.setModel(model1);
-				model1.addColumn("NAZWA");
+				model1.addColumn("ID_WYKONYWANIA_OPERACJI");
+				model1.addColumn("ID_OPERACJI");
 				model1.addColumn("NAZWA_STANOWISKA");
-				model1.addColumn("NR_STANOWISKA");
 				model1.addColumn("NAZWISKO");
-		        model1.addRow(new Object[]{"NAZWA","NAZWA_STANOWISKA","NR_STANOWISKA","NAZWISKO"});	
 				for(int i=0;i<nazwaczesci.size();i++) {
-					model1.addRow(new Object[]{nazwaczesci.get(i),nazwastanowiska.get(i),nrstanowiska.get(i),nazwpracownika.get(i)});	
+					model1.addRow(new Object[]{nazwaczesci.get(i),nazwastanowiska.get(i),nrstanowiska.get(i),nazwpracownika.get(i)});
+					
 				}
 			}
 		}
