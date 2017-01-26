@@ -4,6 +4,7 @@ import java.awt.EventQueue;
 import javax.swing.JFrame;
 import javax.swing.JTextField;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JComboBox;
@@ -44,8 +45,9 @@ public class Window{
 	private JComboBox<String> comboBox_1;
 	private JLabel error;
 	private int zmienna=0;
-	private int id_naprawy=0;
-	private int id_pozycji_serwisowania=0;
+	private int id_naprawy;
+	private int id_pojazdu;
+	private int id_przegladu;
 	
 	private int id=0;
 	
@@ -319,6 +321,17 @@ public class Window{
 		carData[3] = this.field_rok.getText();
 		carData[4] = this.field_przebieg.getText();
 		
+		
+		try
+		{
+		int nr_m,nr_l,tel,rok,przebieg;
+		nr_m = Integer.parseInt(clientData[4]);
+		nr_l = Integer.parseInt(clientData[5]);
+		tel = Integer.parseInt(clientData[6]);
+		rok = Integer.parseInt(carData[3]);
+		przebieg = Integer.parseInt(carData[4]);
+		
+		
 		for(int i =0;i<clientData.length;i++) {
 			if(!clientData[i].isEmpty())
 				counter++;
@@ -337,52 +350,69 @@ public class Window{
 		}
 		
 		if(flag) {
-			try{
-				//insert to wlasciciel_pojazdu
-				int idwlasc = getId("WLASCICIEL_POJAZDU");
-				zmienna = idwlasc;
-				String query = "INSERT INTO WLASCICIEL_POJAZDU VALUES("+idwlasc+", ";
-				for(int i=0;i<clientData.length;i++)
-				{
-					query+="'"+clientData[i]+"', ";
-				}
-				query = query.substring(0, query.length()-2);
-				query += ")";
-				database.executeQuery(query);
-				
-				//insert to model
-				int idmodelu = getId("MODEL");
-				query = "INSERT INTO MODEL VALUES("+idmodelu+", ";
-				query +="'"+carData[0]+"', ";
-				query +="'"+carData[1]+"'";
-				query += ")";
-				database.executeQuery(query);
-				
-				//insert to pojazd
-				int id_pojazdu = getId("POJAZD");
-				query = "INSERT INTO POJAZD VALUES("+id_pojazdu+", "+idwlasc+", "+idmodelu+", ";
-				query = "INSERT INTO POJAZD VALUES("+getId("POJAZD")+", "+idwlasc+", "+idmodelu+", ";
-				query +="'"+carData[2]+"', ";
-				query +="'"+Integer.parseInt(carData[3])+"', ";
-				query +="'"+Integer.parseInt(carData[4])+"'";
-				query += ")";
-				database.executeQuery(query);
-				
-				//insert to naprawa
-				id_naprawy = getId("NAPRAWA");
-				query = "INSERT INTO NAPRAWA (ID_NAPRAWY, ID_POJAZDU) VALUES("+id_naprawy+", "+id_pojazdu+")";
-				//System.out.println("INSERT INTO NAPRAWA (ID_NAPRAWY, ID_POJAZDU) VALUES("+id_naprawy+", "+id_pojazdu+")");
-				database.executeQuery(query);
-				
-				id_pozycji_serwisowania = getId("POZYCJA_PLANU_SERWISOWEGO");
-				query = "INSERT INTO POZYCJA_PLANU_SERWISOWEGO (ID_POZYCJI_PLANU_SERWISOWEGO, ID_MODELU) VALUES("+id_pozycji_serwisowania+", "+idmodelu+")";
-				//System.out.println("INSERT INTO NAPRAWA (ID_NAPRAWY, ID_POJAZDU) VALUES("+id_naprawy+", "+id_pojazdu+")");
-				database.executeQuery(query);
 
+				try{
+					int idmodelu = 0;
+					//insert to model
+					String query = "SELECT ID_MODELU FROM MODEL WHERE NAZWA_MODELU = '"+this.field_model.getText() + "' AND MARKA ='"+ this.field_marka.getText()+"'";
+					ResultSet rs = database.executeQuery(query);
+					System.out.println(query);
+					//rs.next();
+					//rs.getInt(1);
+					//System.out.println(rs.getInt(1));
+					if(rs.next())
+					{
+						 idmodelu = rs.getInt(1);	
+					}
+					else
+					{
+						if(this.comboBox_1.getSelectedIndex()==1)
+						{
+							JOptionPane.showMessageDialog(frame, "Niestety, nie mo¿emy zrealizowaæ przegl¹du dla danego modelu i marki samochodu. Proszê wybraæ opcjê naprawy.");
+							return;
+						}
+						else
+						{
+						 idmodelu = getId("MODEL");
+						query = "INSERT INTO MODEL VALUES("+idmodelu+", ";
+						query +="'"+carData[0]+"', ";
+						query +="'"+carData[1]+"'";
+						query += ")";
+						database.executeQuery(query);
+						}
+					}
+					
+					//insert to wlasciciel_pojazdu
+					int idwlasc = getId("WLASCICIEL_POJAZDU");
+					zmienna = idwlasc;
+					query = "INSERT INTO WLASCICIEL_POJAZDU VALUES("+idwlasc+", ";
+					for(int i=0;i<clientData.length;i++)
+					{
+						query+="'"+clientData[i]+"', ";
+					}
+					query = query.substring(0, query.length()-2);
+					query += ")";
+					database.executeQuery(query);
+	
+
+						
+					//insert to pojazd
+					 id_pojazdu = getId("POJAZD");
+					query = "INSERT INTO POJAZD VALUES("+id_pojazdu+", "+idwlasc+", "+idmodelu+", ";
+					query = "INSERT INTO POJAZD VALUES("+getId("POJAZD")+", "+idwlasc+", "+idmodelu+", ";
+					query +="'"+carData[2]+"', ";
+					query +="'"+Integer.parseInt(carData[3])+"', ";
+					query +="'"+Integer.parseInt(carData[4])+"'";
+					query += ")";
+					database.executeQuery(query);
+				}
+				catch (Exception e) {
+					e.printStackTrace();
+				}
 			}
-			catch (Exception e) {
-				e.printStackTrace();
-			}
+		}catch(Exception e)
+		{
+			JOptionPane.showMessageDialog(frame, "Z³y format danych");
 		}
 	}
 
@@ -393,7 +423,14 @@ public class Window{
 			case 0:
 			{
 				//Naprawa
-				String query = "SELECT ID_OPERACJI, NAZWA FROM OPERACJA";
+				
+				//insert to naprawa
+				id_naprawy = getId("NAPRAWA");
+				String query = "INSERT INTO NAPRAWA (ID_NAPRAWY, ID_POJAZDU) VALUES("+id_naprawy+", "+id_pojazdu+")";
+				//System.out.println("INSERT INTO NAPRAWA (ID_NAPRAWY, ID_POJAZDU) VALUES("+id_naprawy+", "+id_pojazdu+")");
+				database.executeQuery(query);
+				
+				query = "SELECT ID_OPERACJI, NAZWA FROM OPERACJA";
 				ResultSet rs = database.executeQuery(query);
 				List<String> id = new ArrayList<String>();
 				List<String> name = new ArrayList<String>();
@@ -421,11 +458,17 @@ public class Window{
 			case 1:
 			{
 				//Przeglad
-				String query = "SELECT ID_OPERACJI, NAZWA FROM OPERACJA "
-						+ "WHERE ID_OPERACJI IN(SELECT ID_OPERACJI FROM OPERACJA_SERWISOWA "
-						+ "WHERE ID_POZYCJI_PLANU_SERWISOWEGO IN "
-						+ "(SELECT ID_POZYCJI_PLANU_SERWISOWEGO FROM POZYCJA_PLANU_SERWISOWEGO "
-						+ "WHERE ID_MODELU IN (SELECT ID_MODELU FROM POJAZD WHERE NR_REJESTRACYJNY = '"+this.field_rejestr.getText()+"')))";
+				
+				//insert to naprawa
+				id_przegladu = getId("PRZEGLAD");
+				String query = "INSERT INTO PRZEGLAD (ID_PRZEGLADU, ID_POJAZDU) VALUES("+id_przegladu+", "+id_pojazdu+")";
+				database.executeQuery(query);
+				
+				query = "SELECT ID_OPERACJI, NAZWA FROM OPERACJA WHERE ID_OPERACJI IN(SELECT ID_OPERACJI "
+						+"FROM OPERACJA_SERWISOWA WHERE ID_POZYCJI_PLANU_SERWISOWEGO IN "
+						+"(SELECT ID_POZYCJI_PLANU_SERWISOWEGO FROM POZYCJA_PLANU_SERWISOWEGO "
+						+"WHERE ID_MODELU  IN (SELECT ID_MODELU FROM \"MODEL\" WHERE NAZWA_MODELU='"+this.field_model.getText()+"')))";
+				System.out.println(query);
 				ResultSet rs = database.executeQuery(query);
 				List<String> id = new ArrayList<String>();
 				List<String> name = new ArrayList<String>();
@@ -440,42 +483,34 @@ public class Window{
 				model.addColumn("ID_OPERACJI");
 		        model.addColumn("NAZWA");
 		        model.addRow(new Object[]{"ID_OPERACJI","NAZWA"});	
-				for(int i=0;i<id.size();i++) {
-					model.addRow(new Object[]{id.get(i),name.get(i)});	
-				}
-				
-					query = "SELECT ID_STANOWISKA FROM STANOWISKO WHERE NAZWA_STANOWISKA = "+ table.getValueAt(this.table.getSelectedRow(), 1);
+				for(int k=0;k<id.size();k++) 
+				{
+					model.addRow(new Object[]{id.get(k),name.get(k)});	
+
+					query = "SELECT ID_STANOWISKA FROM STANOWISKO WHERE NAZWA_STANOWISKA = '"+ table.getValueAt(k+1, 1)+"'";
+					System.out.println(query);
 					ResultSet rsc = database.executeQuery(query);
-					rsc.first();
+					rsc.next();
 					int id_stanowiska = rsc.getInt(1);
-					query = "SELECT ID_NAPRAWY FROM NAPRAWA WHERE ID_POJAZDU = (SELECT ID_POJAZDU FROM POJAZD WHERE ID_WLASCICIELA = "+ zmienna;
+					
+					query = "SELECT ID_PRZEGLADU FROM PRZEGLAD WHERE ID_POJAZDU = (SELECT ID_POJAZDU FROM POJAZD WHERE ID_WLASCICIELA = "+ zmienna +")";
+					System.out.println(query);
 					ResultSet rsd = database.executeQuery(query);
-					rsd.first();
+					rsd.next();
 					int id_naprawy = rsd.getInt(1);
 					
-					query = "INSERT INTO WYKONANIE_OPERACJI (ID_WYKONANIA_OPERACJI, ID_PRZEGLADU, ID_NAPRAWY, ID_OPERACJI, ID_STANOWISKA, RODZAJ_OPERACJI) "
+					query = "INSERT INTO WYKONANIE_OPERACJI (ID_WYKONANIA_OPERACJI, ID_PRZEGLADU, ID_OPERACJI, ID_STANOWISKA, RODZAJ_OPERACJI) "
 							+ "VALUES ("
 							+getId("WYKONANIE_OPERACJI")
-							+","+id
-							+","+id_naprawy
-							+","+model.getValueAt(this.table.getSelectedRow(), 0)
+							+","+id_przegladu
+							+","+model.getValueAt(k+1, 0)
 							+","+id_stanowiska
-							+"Naprawa"
+							+",'Przeglad'"
 							+")";
-					database.executeQuery(query);
-				
-				
-				for(int i=0;i<id.size();i++) {
-					model.addRow(new Object[]{id.get(i),name.get(i)});	
-				
-					query = "INSERT INTO WYKONANIE_OPERACJI (ID_WYKONANIA_OPERACJI, ID_PRZEGLADU, ID_OPERACJI) "
-							+ "VALUES ("
-							+getId("WYKONANIE_OPERACJI")
-							+getId("ID_PRZEGLADU")
-							+id.get(i)
-							+")";
+					System.out.println(query);
 					database.executeQuery(query);
 				}
+				
 				break;
 			}
 		}
@@ -491,8 +526,10 @@ public class Window{
 			if(this.table.getSelectedRow() != -1 && this.comboBox_1.getSelectedIndex() == 0)	
 			{
 				String query = "SELECT ID_STANOWISKA FROM STANOWISKO WHERE NAZWA_STANOWISKA = '"+ table.getValueAt(this.table.getSelectedRow(), 1)+"'";
+				System.out.println(query);
 				ResultSet rsc = database.executeQuery(query);
-				int id_stanowiska = rsc.getRow();
+				rsc.next();
+				int id_stanowiska = rsc.getInt(1);
 				
 				query = "INSERT INTO WYKONANIE_OPERACJI (ID_WYKONANIA_OPERACJI, ID_NAPRAWY, ID_OPERACJI, ID_STANOWISKA, RODZAJ_OPERACJI) "
 						+ "VALUES ("
@@ -514,7 +551,7 @@ public class Window{
 	private void resourceAllocation() {
 		//scenariusz 2
 		try{		
-			String query = "SELECT ID_WYKONANIA_OPERACJI FROM WYKONANIE_OPERACJI";
+			String query = "SELECT ID_WYKONANIA_OPERACJI FROM WYKONANIE_OPERACJI WHERE ID_WYKONANIA_OPERACJI NOT IN (SELECT ID_WYKONANIA_OPERACJI FROM PRZYDZIAL_PRACOWNIKA)";
 			ResultSet rs = database.executeQuery(query);
 			List<String> idwykon = new ArrayList<String>();
 			while(rs.next()) {
@@ -523,38 +560,47 @@ public class Window{
 			if(idwykon.size() !=0) {
 				for(int k=0;k<idwykon.size();k++) {
 					//TODO przydzial pracownika
-					query = "INSERT INTO Przydzial_Pracownika VALUES (1, "
+					query = "INSERT INTO PRZYDZIAL_PRACOWNIKA VALUES "
+							+ "((SELECT ID_PRACOWNIKA FROM PRACOWNIK WHERE ZAWOD = "
+							+ "(SELECT NAZWA FROM OPERACJA WHERE ID_OPERACJI = "
+							+ "(SELECT ID_OPERACJI FROM WYKONANIE_OPERACJI WHERE ID_WYKONANIA_OPERACJI = "
+							+ idwykon.get(k)
+							+ "))),"
 							+ idwykon.get(k)
 							+ ")";
+					System.out.println(query);
 					database.executeQuery(query);
 					
 					//przydzial stanowiska
 					query = "UPDATE WYKONANIE_OPERACJI SET ID_STANOWISKA = "
-							+ "(SELECT ID_STANOWISKA FROM STANOWISKO WHERE ID_TYPU_STANOWISKA = "
+							+ "(SELECT ID_STANOWISKA FROM STANOWISKO WHERE ID_TYPU_STANOWISKA IN "
 							+ "(SELECT ID_TYPU_STANOWISKA FROM OPERACJA WHERE ID_TYPU_STANOWISKA = "
 							+ "WYKONANIE_OPERACJI.ID_OPERACJI)) WHERE ID_WYKONANIA_OPERACJI = "
 							+ idwykon.get(k);
+					System.out.println(query);
 					database.executeQuery(query);
 					
 					//przydzial czesci
 					query = "INSERT INTO PRZYDZIAL_CZESCI VALUES "
 							+ "("
 							+ idwykon.get(k)
-							+ ",(SELECT ID_CZESCI FROM Czesc WHERE ID_OPERACJI = "
+							+ ",(SELECT ID_CZESCI FROM CZESC WHERE ID_OPERACJI = "
 							+ "(SELECT ID_OPERACJI FROM WYKONANIE_OPERACJI WHERE ID_WYKONANIA_OPERACJI = "
 							+ idwykon.get(k)
 							+ ")))";
+					System.out.println(query);
 					database.executeQuery(query);
 				}
 				
 				//wyswietlenie wszytkiego 
 				query = "SELECT CZESC.NAZWA, STANOWISKO.NAZWA_STANOWISKA, STANOWISKO.NR_STANOWISKA, PRACOWNIK.NAZWISKO "
-							+ "FROM CZESC JOIN PRACOWNIK ON ID_PRACOWNIKA = "
-							+ "(SELECT ID_PRACOWNIKA FROM PRZYDZIAL_PRACOWNIKA WHERE WYKONANIE_OPERACJI = "
-							+ "(SELECT ID_WYKONANIA_OPERACJI FROM PRZYDZIAL_CZESCI WHERE ID_CZESCI = CZESC.ID_CZESCI)) "
-							+ "JOIN STANOWISKO ON ID_STANOWISKA = "
-							+ "(SELECT ID_STANOWISKA FROM WYKONANIE_OPERACJI WHERE ID_WYKONANIA_OPERACJI = "
-							+ "(SELECT ID_WYKONANIA_OPERACJI FROM PRZYDZIAL_CZESCI WHERE ID_CZESCI = CZESC.ID_CZESCI))";
+							+ "FROM CZESC JOIN PRACOWNIK ON ID_PRACOWNIKA IN "
+							+ "(SELECT ID_PRACOWNIKA FROM PRZYDZIAL_PRACOWNIKA WHERE ID_WYKONANIA_OPERACJI IN "
+							+ "(SELECT ID_WYKONANIA_OPERACJI FROM PRZYDZIAL_CZESCI WHERE ID_CZESCI IN CZESC.ID_CZESCI)) "
+							+ "JOIN STANOWISKO ON ID_STANOWISKA IN "
+							+ "(SELECT ID_STANOWISKA FROM WYKONANIE_OPERACJI WHERE ID_WYKONANIA_OPERACJI IN "
+							+ "(SELECT ID_WYKONANIA_OPERACJI FROM PRZYDZIAL_CZESCI WHERE ID_CZESCI IN CZESC.ID_CZESCI))";
+				System.out.println(query);
 				rs  = database.executeQuery(query);
 				List<String> nazwaczesci = new ArrayList<String>();
 				List<String> nazwastanowiska = new ArrayList<String>();
@@ -566,14 +612,18 @@ public class Window{
 					nrstanowiska.add(rs.getString("NR_STANOWISKA"));
 					nazwpracownika.add(rs.getString("NAZWISKO"));
 				}
-					
-				DefaultTableModel model = (DefaultTableModel) table_1.getModel();
-				model.addColumn("NAZWA");
-				model.addColumn("NAZWA_STANOWISKA");
-				model.addColumn("NR_STANOWISKA");
-				model.addColumn("NAZWISKO");
+				
+				DefaultTableModel model1 = (DefaultTableModel) table_1.getModel();
+				model1.setRowCount(0);
+				model1.setColumnCount(0);
+				table_1.setModel(model1);
+				model1.addColumn("NAZWA");
+				model1.addColumn("NAZWA_STANOWISKA");
+				model1.addColumn("NR_STANOWISKA");
+				model1.addColumn("NAZWISKO");
+		        model1.addRow(new Object[]{"NAZWA","NAZWA_STANOWISKA","NR_STANOWISKA","NAZWISKO"});	
 				for(int i=0;i<nazwaczesci.size();i++) {
-					model.addRow(new Object[]{nazwaczesci.get(i),nazwastanowiska.get(i),nrstanowiska.get(i),nazwpracownika.get(i)});	
+					model1.addRow(new Object[]{nazwaczesci.get(i),nazwastanowiska.get(i),nrstanowiska.get(i),nazwpracownika.get(i)});	
 				}
 			}
 		}
